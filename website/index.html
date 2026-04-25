@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vo!d — Kill Bots. Devour DDoS. Leave Nothing.</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,900;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+:root {
+  --void: #000000;
+  --white: #f0ede8;
+  --acid: #c8ff00;
+  --red: #ff2020;
+  --dim: rgba(240,237,232,0.35);
+  --dimmer: rgba(240,237,232,0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--void);
+  color: var(--white);
+  font-family: 'Barlow Condensed', sans-serif;
+  overflow-x: hidden;
+  cursor: crosshair;
+}
+
+/* ── NOISE ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 20px 48px;
+  border-bottom: 1px solid var(--dimmer);
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(12px);
+}
+
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 0.05em;
+  color: var(--white);
+  text-decoration: none;
+}
+
+.nav-logo span { color: var(--acid); }
+
+.nav-links {
+  display: flex;
+  gap: 40px;
+  list-style: none;
+  margin-left: auto;
+}
+
+.nav-links a {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.nav-links a:hover { color: var(--acid); }
+
+.nav-cta {
+  margin-left: 40px;
+  background: var(--acid);
+  color: var(--void) !important;
+  padding: 8px 20px;
+  font-weight: 900 !important;
+  letter-spacing: 0.15em !important;
+}
+
+.nav-cta:hover { background: var(--white); color: var(--void) !important; }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 120px 48px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Diagonal slash background */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  right: -5%;
+  width: 65%;
+  height: 140%;
+  background: linear-gradient(135deg, transparent 48%, rgba(200,255,0,0.03) 48%, rgba(200,255,0,0.03) 52%, transparent 52%);
+  pointer-events: none;
+}
+
+.hero-bg-text {
+  position: absolute;
+  top: 50%;
+  left: 48px;
+  transform: translateY(-50%);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(200px, 30vw, 420px);
+  line-height: 0.85;
+  color: rgba(240,237,232,0.025);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.hero-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 40px; height: 1px;
+  background: var(--acid);
+}
+
+.hero h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(72px, 11vw, 160px);
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+  color: var(--white);
+  position: relative;
+  z-index: 1;
+}
+
+.hero h1 .accent { color: var(--acid); }
+.hero h1 .strike {
+  position: relative;
+  color: rgba(240,237,232,0.2);
+}
+.hero h1 .strike::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  height: 4px;
+  background: var(--red);
+  transform: rotate(-2deg);
+}
+
+.hero-sub {
+  margin-top: 32px;
+  font-size: clamp(18px, 2.5vw, 26px);
+  font-weight: 300;
+  color: var(--dim);
+  max-width: 560px;
+  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-actions {
+  margin-top: 48px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.btn-primary {
+  background: var(--acid);
+  color: var(--void);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 16px 40px;
+  border: none;
+  cursor: crosshair;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.15s;
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+}
+
+.btn-primary:hover {
+  background: var(--white);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--white);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 15px 32px;
+  border: 1px solid rgba(240,237,232,0.25);
+  cursor: crosshair;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.15s;
+}
+
+.btn-secondary:hover {
+  border-color: var(--acid);
+  color: var(--acid);
+}
+
+/* ── LIVE COUNTER BAR ── */
+.counter-bar {
+  background: var(--acid);
+  padding: 12px 48px;
+  display: flex;
+  gap: 64px;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.counter-bar::before {
+  content: 'LIVE';
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  color: var(--void);
+  opacity: 0.5;
+  margin-right: -48px;
+}
+
+.counter-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.counter-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  color: var(--void);
+  letter-spacing: 0.02em;
+}
+
+.counter-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.5);
+}
+
+/* ── SECTION BASE ── */
+section { padding: 120px 48px; }
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.section-label::before {
+  content: '';
+  width: 32px; height: 1px;
+  background: var(--acid);
+}
+
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.92;
+  letter-spacing: 0.01em;
+  color: var(--white);
+  margin-bottom: 24px;
+}
+
+.section-body {
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--dim);
+  max-width: 540px;
+  line-height: 1.65;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--dimmer);
+}
+
+/* ── STATS GRID ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--dimmer);
+  margin-top: 80px;
+}
+
+@media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.stat-cell {
+  padding: 48px 40px;
+  border-right: 1px solid var(--dimmer);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-cell:last-child { border-right: none; }
+
+.stat-cell::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--acid);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.stat-cell:hover::before { transform: scaleX(1); }
+
+.stat-n {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 64px;
+  line-height: 1;
+  color: var(--white);
+  letter-spacing: 0.02em;
+}
+
+.stat-n .unit {
+  font-size: 32px;
+  color: var(--acid);
+}
+
+.stat-desc {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-top: 8px;
+}
+
+/* ── HOW IT WORKS ── */
+.pipeline {
+  margin-top: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--dimmer);
+}
+
+.pipe-row {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: stretch;
+  border-bottom: 1px solid var(--dimmer);
+  transition: background 0.15s;
+}
+
+.pipe-row:last-child { border-bottom: none; }
+.pipe-row:hover { background: rgba(200,255,0,0.03); }
+
+.pipe-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: rgba(200,255,0,0.25);
+  border-right: 1px solid var(--dimmer);
+  padding: 24px 16px;
+}
+
+.pipe-content {
+  padding: 28px 32px;
+}
+
+.pipe-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.pipe-desc {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--dim);
+  line-height: 1.55;
+}
+
+.pipe-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 28px 24px;
+  align-items: center;
+  border-left: 1px solid var(--dimmer);
+  min-width: 260px;
+}
+
+.pipe-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  background: var(--dimmer);
+  color: var(--acid);
+  letter-spacing: 0.05em;
+  clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+}
+
+/* ── ESCALATION ── */
+.escalation-track {
+  margin-top: 80px;
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--dimmer);
+  overflow: hidden;
+}
+
+.esc-step {
+  flex: 1;
+  padding: 40px 28px;
+  border-right: 1px solid var(--dimmer);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.esc-step:last-child { border-right: none; }
+.esc-step:hover { background: rgba(240,237,232,0.03); }
+
+.esc-step::after {
+  content: '→';
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dimmer);
+  font-size: 20px;
+  z-index: 2;
+}
+
+.esc-step:last-child::after { display: none; }
+
+.esc-score {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+
+.esc-icon { font-size: 32px; margin-bottom: 12px; }
+
+.esc-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.esc-body {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--dim);
+  line-height: 1.6;
+}
+
+.esc-step.s0 .esc-name { color: #4ade80; }
+.esc-step.s1 .esc-name { color: #86efac; }
+.esc-step.s2 .esc-name { color: #fbbf24; }
+.esc-step.s3 .esc-name { color: #f97316; }
+.esc-step.s4 .esc-name { color: #f97316; }
+.esc-step.s5 .esc-name { color: var(--red); }
+.esc-step.s6 .esc-name { color: var(--red); }
+
+/* ── DETECTION GRID ── */
+.det-grid {
+  margin-top: 80px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid var(--dimmer);
+}
+
+@media (max-width: 900px) { .det-grid { grid-template-columns: 1fr; } }
+
+.det-card {
+  padding: 36px 32px;
+  border-right: 1px solid var(--dimmer);
+  border-bottom: 1px solid var(--dimmer);
+  transition: background 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.det-card:nth-child(3n) { border-right: none; }
+.det-card:hover { background: rgba(200,255,0,0.025); }
+
+.det-card::before {
+  content: attr(data-num);
+  position: absolute;
+  bottom: 12px;
+  right: 20px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 80px;
+  color: rgba(240,237,232,0.03);
+  pointer-events: none;
+  line-height: 1;
+}
+
+.det-icon { font-size: 28px; margin-bottom: 16px; }
+
+.det-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+.det-body {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--dim);
+  line-height: 1.65;
+  margin-bottom: 16px;
+}
+
+.det-signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.det-signal {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 2px 7px;
+  border: 1px solid rgba(200,255,0,0.2);
+  color: rgba(200,255,0,0.6);
+  letter-spacing: 0.04em;
+}
+
+/* ── WINDOWS COMPAT ── */
+.compat-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 48px;
+  font-size: 14px;
+}
+
+.compat-table th {
+  text-align: left;
+  padding: 14px 20px;
+  background: rgba(240,237,232,0.04);
+  color: var(--acid);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--dimmer);
+}
+
+.compat-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--dimmer);
+  color: var(--dim);
+  font-weight: 300;
+}
+
+.compat-table tr:hover td { background: rgba(240,237,232,0.02); }
+
+.check-yes { color: var(--acid); font-size: 16px; }
+.check-partial { color: #fbbf24; font-size: 16px; }
+.check-no { color: rgba(240,237,232,0.2); font-size: 16px; }
+
+/* ── ML SECTION ── */
+.ml-grid {
+  margin-top: 80px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  border: 1px solid var(--dimmer);
+}
+
+@media (max-width: 1100px) { .ml-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.ml-card {
+  padding: 32px 24px;
+  border-right: 1px solid var(--dimmer);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.15s;
+}
+
+.ml-card:last-child { border-right: none; }
+.ml-card:hover { background: rgba(240,237,232,0.03); }
+
+.ml-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.ml-card:nth-child(1)::after { background: var(--acid); }
+.ml-card:nth-child(2)::after { background: #60a5fa; }
+.ml-card:nth-child(3)::after { background: #c084fc; }
+.ml-card:nth-child(4)::after { background: #fb923c; }
+.ml-card:nth-child(5)::after { background: var(--red); }
+
+.ml-model {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.ml-type {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 16px;
+}
+
+.ml-desc {
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--dim);
+  line-height: 1.65;
+}
+
+/* ── CTA SECTION ── */
+.cta-section {
+  padding: 140px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-section::before {
+  content: 'VO!D';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(200px, 35vw, 500px);
+  color: rgba(200,255,0,0.03);
+  pointer-events: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.cta-section .section-title {
+  font-size: clamp(60px, 10vw, 140px);
+  position: relative;
+  z-index: 1;
+}
+
+.cta-section .section-body {
+  margin: 24px auto;
+  max-width: 500px;
+  position: relative;
+  z-index: 1;
+}
+
+.cta-section .hero-actions {
+  justify-content: center;
+  margin-top: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--dimmer);
+  padding: 40px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.footer-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  color: var(--white);
+  letter-spacing: 0.05em;
+}
+
+.footer-logo span { color: var(--acid); }
+
+.footer-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.footer-links a {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-decoration: none;
+}
+
+.footer-links a:hover { color: var(--acid); }
+
+.footer-copy {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: rgba(240,237,232,0.2);
+}
+
+/* ── SCROLL ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* code block */
+.code-snip {
+  background: rgba(240,237,232,0.04);
+  border: 1px solid var(--dimmer);
+  border-left: 3px solid var(--acid);
+  padding: 20px 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.9;
+  overflow-x: auto;
+  margin-top: 32px;
+}
+
+.code-snip .c { color: rgba(240,237,232,0.25); }
+.code-snip .k { color: #c084fc; }
+.code-snip .s { color: var(--acid); }
+.code-snip .n { color: #fb923c; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Vo<span>!</span>d</a>
+  <ul class="nav-links">
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#detection">Detection</a></li>
+    <li><a href="#ml">ML Engine</a></li>
+    <li><a href="#windows">Windows</a></li>
+    <li><a href="#deploy" class="nav-cta">Deploy Now</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-text">VO!D</div>
+  <div class="hero-eyebrow">Universal Bot &amp; DDoS Protection</div>
+  <h1>
+    KILL<br>
+    <span class="accent">EVERY</span><br>
+    <span class="strike">BOT</span>
+  </h1>
+  <p class="hero-sub">
+    Open-source, self-optimizing edge protection. Drop it in front of anything.
+    7 detection layers. 5 ML models. eBPF kernel-level interception.
+    Adaptive challenges that scale with threat level.
+  </p>
+  <div class="hero-actions">
+    <a href="#deploy" class="btn-primary">Deploy in 60 seconds</a>
+    <a href="https://github.com/yourorg/void" class="btn-secondary">View Source →</a>
+  </div>
+</section>
+
+<!-- LIVE COUNTER BAR -->
+<div class="counter-bar">
+  <div class="counter-item">
+    <span class="counter-num" id="cnt-bots">0</span>
+    <span class="counter-label">Bots Blocked Today</span>
+  </div>
+  <div class="counter-item">
+    <span class="counter-num" id="cnt-req">0</span>
+    <span class="counter-label">Requests Analyzed / sec</span>
+  </div>
+  <div class="counter-item">
+    <span class="counter-num" id="cnt-ddos">0</span>
+    <span class="counter-label">DDoS Attacks Absorbed</span>
+  </div>
+  <div class="counter-item">
+    <span class="counter-num" id="cnt-fp">0</span>
+    <span class="counter-label">Fingerprints Tracked</span>
+  </div>
+  <div class="counter-item">
+    <span class="counter-num" id="cnt-lat">&lt;1<span style="font-size:18px">ms</span></span>
+    <span class="counter-label">Edge Latency</span>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- STATS -->
+<section>
+  <div class="section-label">By The Numbers</div>
+  <h2 class="section-title">PROTECTION<br>AT SCALE</h2>
+
+  <div class="stats-grid reveal">
+    <div class="stat-cell">
+      <div class="stat-n">100<span class="unit">+</span></div>
+      <div class="stat-desc">Detection Signals</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-n">7</div>
+      <div class="stat-desc">Defense Layers</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-n">5</div>
+      <div class="stat-desc">ML Models Running in Parallel</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-n">&lt;1<span class="unit">ms</span></div>
+      <div class="stat-desc">Edge Proxy Latency P99</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-n">5<span class="unit">ms</span></div>
+      <div class="stat-desc">ML Scoring Budget P99</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-n">∞</div>
+      <div class="stat-desc">Nightly Self-Retraining</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-n">2</div>
+      <div class="stat-desc">Platforms: Linux &amp; Windows</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-n">0</div>
+      <div class="stat-desc">Vendor Lock-in</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-label">Architecture</div>
+  <h2 class="section-title">7 LAYERS.<br>NOTHING PASSES.</h2>
+  <p class="section-body">Every request is processed through a sequential pipeline. Each layer adds signals. The scorer decides. The challenge engine acts.</p>
+
+  <div class="pipeline reveal">
+    <div class="pipe-row">
+      <div class="pipe-num">L1</div>
+      <div class="pipe-content">
+        <div class="pipe-name">Kernel / eBPF (XDP + TC)</div>
+        <div class="pipe-desc">SYN floods die at the NIC — before the kernel network stack even sees them. TCP fingerprints (window size, MSS, TTL, WSCALE) extracted from every SYN packet via eBPF programs running at line speed. On Windows: software-mode WFP filter.</div>
+      </div>
+      <div class="pipe-tags">
+        <span class="pipe-tag">XDP_DROP</span>
+        <span class="pipe-tag">SYN Flood</span>
+        <span class="pipe-tag">TCP Fingerprint</span>
+        <span class="pipe-tag">IP Blocklist</span>
+        <span class="pipe-tag">NIC Offload</span>
+      </div>
+    </div>
+    <div class="pipe-row">
+      <div class="pipe-num">L2</div>
+      <div class="pipe-content">
+        <div class="pipe-name">Edge Proxy — Rust</div>
+        <div class="pipe-desc">TLS termination with full ClientHello parsing for JA3 and JA4 fingerprints. HTTP/2 SETTINGS frame fingerprinting and pseudo-header order analysis. GeoIP + ASN classification. Multi-scope rate limiting backed by Redis.</div>
+      </div>
+      <div class="pipe-tags">
+        <span class="pipe-tag">JA3 / JA4</span>
+        <span class="pipe-tag">HTTP/2 FP</span>
+        <span class="pipe-tag">TLS Inspect</span>
+        <span class="pipe-tag">Rate Limit</span>
+        <span class="pipe-tag">ASN Lookup</span>
+      </div>
+    </div>
+    <div class="pipe-row">
+      <div class="pipe-num">L3</div>
+      <div class="pipe-content">
+        <div class="pipe-name">Request Analysis Engine</div>
+        <div class="pipe-desc">URL normalization (handles all 10+ encoding bypass variants), header anomaly detection, honeypot matching, timing jitter measurement, slow HTTP attack detection, JSON entropy analysis, parameter pollution detection.</div>
+      </div>
+      <div class="pipe-tags">
+        <span class="pipe-tag">URL Normalize</span>
+        <span class="pipe-tag">Honeypot</span>
+        <span class="pipe-tag">Timing Jitter</span>
+        <span class="pipe-tag">Slow HTTP</span>
+        <span class="pipe-tag">HPP Detect</span>
+      </div>
+    </div>
+    <div class="pipe-row">
+      <div class="pipe-num">L4</div>
+      <div class="pipe-content">
+        <div class="pipe-name">Behavior / ML Engine — Python</div>
+        <div class="pipe-desc">Five parallel ML models: Isolation Forest (anomaly detection), LSTM (session navigation sequences), Transformer (cross-session coordination), DBSCAN (fingerprint clustering), Graph/Louvain (botnet community detection). All async, 5ms P99 budget.</div>
+      </div>
+      <div class="pipe-tags">
+        <span class="pipe-tag">Isolation Forest</span>
+        <span class="pipe-tag">LSTM</span>
+        <span class="pipe-tag">Transformer</span>
+        <span class="pipe-tag">DBSCAN</span>
+        <span class="pipe-tag">Graph Engine</span>
+      </div>
+    </div>
+    <div class="pipe-row">
+      <div class="pipe-num">L5</div>
+      <div class="pipe-content">
+        <div class="pipe-name">Client Challenge Engine — JS + WASM</div>
+        <div class="pipe-desc">Browser telemetry collection (mouse entropy, scroll inertia, keyboard rhythm, focus events). Canvas / WebGL / Audio fingerprinting. Automation framework probes. Proof-of-work SHA256. WASM compute challenge. All challenge assets inlined — zero extra requests under DDoS.</div>
+      </div>
+      <div class="pipe-tags">
+        <span class="pipe-tag">Mouse Entropy</span>
+        <span class="pipe-tag">Canvas FP</span>
+        <span class="pipe-tag">WebGL FP</span>
+        <span class="pipe-tag">PoW SHA256</span>
+        <span class="pipe-tag">WASM Task</span>
+      </div>
+    </div>
+    <div class="pipe-row">
+      <div class="pipe-num">L6</div>
+      <div class="pipe-content">
+        <div class="pipe-name">Scoring &amp; Decision Engine</div>
+        <div class="pipe-desc">30+ weighted signals aggregated into a risk score 0–100+. Each signal weight is continuously adjusted by the nightly ML retraining loop based on precision/recall metrics from confirmed attack logs.</div>
+      </div>
+      <div class="pipe-tags">
+        <span class="pipe-tag">Score 0–100+</span>
+        <span class="pipe-tag">Allow</span>
+        <span class="pipe-tag">Challenge</span>
+        <span class="pipe-tag">Block</span>
+        <span class="pipe-tag">Adaptive Weights</span>
+      </div>
+    </div>
+    <div class="pipe-row">
+      <div class="pipe-num">L7</div>
+      <div class="pipe-content">
+        <div class="pipe-name">Intelligence &amp; Feedback Loop</div>
+        <div class="pipe-desc">Attack signatures auto-promoted from ML detections to fast edge rules. Nightly model retraining on confirmed labels. Threat intel feeds (Spamhaus, AbuseIPDB). TOR exit list refresh every 30 minutes.</div>
+      </div>
+      <div class="pipe-tags">
+        <span class="pipe-tag">Auto-Retrain</span>
+        <span class="pipe-tag">Threat Intel</span>
+        <span class="pipe-tag">Sig Evolution</span>
+        <span class="pipe-tag">Self-Optimize</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ESCALATION -->
+<section>
+  <div class="section-label">Challenge System</div>
+  <h2 class="section-title">ESCALATE<br>OR EXECUTE.</h2>
+  <p class="section-body">Challenge difficulty scales exactly with threat level. Humans never see anything unless the score demands it.</p>
+
+  <div class="escalation-track reveal">
+    <div class="esc-step s0">
+      <div class="esc-score">SCORE: 0–20</div>
+      <div class="esc-icon">✓</div>
+      <div class="esc-name">ALLOW</div>
+      <div class="esc-body">Clean traffic passes through with zero friction.</div>
+    </div>
+    <div class="esc-step s1">
+      <div class="esc-score">SCORE: 20–40</div>
+      <div class="esc-icon">👁</div>
+      <div class="esc-name">INVISIBLE</div>
+      <div class="esc-body">Silent telemetry collection. User sees nothing.</div>
+    </div>
+    <div class="esc-step s2">
+      <div class="esc-score">SCORE: 40–60</div>
+      <div class="esc-icon">⚙</div>
+      <div class="esc-name">JS CHALLENGE</div>
+      <div class="esc-body">Browser environment validation + fingerprint collection.</div>
+    </div>
+    <div class="esc-step s3">
+      <div class="esc-score">SCORE: 60–80</div>
+      <div class="esc-icon">💎</div>
+      <div class="esc-name">PROOF OF WORK</div>
+      <div class="esc-body">SHA256 partial collision. Difficulty scales 4–20 bits with score.</div>
+    </div>
+    <div class="esc-step s4">
+      <div class="esc-score">SCORE: 65–85</div>
+      <div class="esc-icon">🔧</div>
+      <div class="esc-name">WASM CHALLENGE</div>
+      <div class="esc-body">WebAssembly compute task. Exposes sandboxed headless envs.</div>
+    </div>
+    <div class="esc-step s5">
+      <div class="esc-score">SCORE: 80–100</div>
+      <div class="esc-icon">🤖</div>
+      <div class="esc-name">CAPTCHA</div>
+      <div class="esc-body">Human verification. Interaction-based validation required.</div>
+    </div>
+    <div class="esc-step s6">
+      <div class="esc-score">SCORE: 100+</div>
+      <div class="esc-icon">✕</div>
+      <div class="esc-name">BLOCK</div>
+      <div class="esc-body">403 + IP blacklisted at kernel via eBPF. No reply.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- DETECTION -->
+<section id="detection">
+  <div class="section-label">Detection Surface</div>
+  <h2 class="section-title">NOWHERE<br>TO HIDE.</h2>
+  <p class="section-body">Signals collected across every layer — network, transport, application, and behavioral. Bots fail on at least one.</p>
+
+  <div class="det-grid reveal">
+    <div class="det-card" data-num="01">
+      <div class="det-icon">⏱</div>
+      <div class="det-title">Timing Jitter Analysis</div>
+      <div class="det-body">Bots fire at deterministic intervals. Humans don't. Inter-request stddev below 2ms across 5+ requests = zero jitter flag.</div>
+      <div class="det-signals">
+        <span class="det-signal">interval_stddev</span>
+        <span class="det-signal">cv_ratio</span>
+        <span class="det-signal">periodicity</span>
+      </div>
+    </div>
+    <div class="det-card" data-num="02">
+      <div class="det-icon">🖱</div>
+      <div class="det-title">Mouse Entropy</div>
+      <div class="det-body">Real users show Brownian-like cursor physics. Bots move in straight lines with zero acceleration variance and no teleport events.</div>
+      <div class="det-signals">
+        <span class="det-signal">curve_entropy</span>
+        <span class="det-signal">accel_variance</span>
+        <span class="det-signal">teleport_count</span>
+      </div>
+    </div>
+    <div class="det-card" data-num="03">
+      <div class="det-icon">🎭</div>
+      <div class="det-title">Automation Frameworks</div>
+      <div class="det-body">Puppeteer, Playwright, Selenium, headless Chrome. Detected via navigator.webdriver, missing plugins, JS engine anomalies, Math.random entropy.</div>
+      <div class="det-signals">
+        <span class="det-signal">navigator.webdriver</span>
+        <span class="det-signal">plugin_count=0</span>
+        <span class="det-signal">fp_precision</span>
+      </div>
+    </div>
+    <div class="det-card" data-num="04">
+      <div class="det-icon">🔒</div>
+      <div class="det-title">TLS Fingerprinting</div>
+      <div class="det-body">JA3 and JA4 fingerprints from raw ClientHello. Cipher suite order, extension order, ALPN, elliptic curves. Mismatch with declared User-Agent = suspicious.</div>
+      <div class="det-signals">
+        <span class="det-signal">ja3_hash</span>
+        <span class="det-signal">ja4_hash</span>
+        <span class="det-signal">cipher_order</span>
+      </div>
+    </div>
+    <div class="det-card" data-num="05">
+      <div class="det-icon">📡</div>
+      <div class="det-title">HTTP/2 Fingerprinting</div>
+      <div class="det-body">Chrome uses :method :authority :scheme :path. curl reverses the order. SETTINGS frame values identify the exact client library. Divergence = penalty.</div>
+      <div class="det-signals">
+        <span class="det-signal">pseudo_header_order</span>
+        <span class="det-signal">settings_frame</span>
+        <span class="det-signal">window_increment</span>
+      </div>
+    </div>
+    <div class="det-card" data-num="06">
+      <div class="det-icon">🌍</div>
+      <div class="det-title">Geo Velocity</div>
+      <div class="det-body">Germany → Japan in 60 seconds. Haversine distance / elapsed time &gt; 1000 km/h = impossible. Session flagged immediately.</div>
+      <div class="det-signals">
+        <span class="det-signal">haversine_km</span>
+        <span class="det-signal">speed_kmh</span>
+        <span class="det-signal">impossible_flag</span>
+      </div>
+    </div>
+    <div class="det-card" data-num="07">
+      <div class="det-icon">🕸</div>
+      <div class="det-title">Botnet Clustering</div>
+      <div class="det-body">100 IPs, identical canvas hash, identical WebGL fingerprint, different geos. DBSCAN + Louvain community detection finds the farm and blacklists all members.</div>
+      <div class="det-signals">
+        <span class="det-signal">canvas_cluster</span>
+        <span class="det-signal">community_id</span>
+        <span class="det-signal">homogeneity</span>
+      </div>
+    </div>
+    <div class="det-card" data-num="08">
+      <div class="det-icon">📈</div>
+      <div class="det-title">Distributed Low-Rate DDoS</div>
+      <div class="det-body">100,000 IPs × 1 req/10s = 10,000 RPS. Invisible to per-IP limits. Transformer model detects cross-session coordination. EWMA baseline detects the spike.</div>
+      <div class="det-signals">
+        <span class="det-signal">global_rps_spike</span>
+        <span class="det-signal">ip_entropy</span>
+        <span class="det-signal">coordination_score</span>
+      </div>
+    </div>
+    <div class="det-card" data-num="09">
+      <div class="det-icon">🍯</div>
+      <div class="det-title">Honeypots &amp; Canaries</div>
+      <div class="det-body">/.env, /.git/config, /wp-login.php, /api/v0/users, hidden CSS links in HTML. Humans never reach them. Bots always do. +50 score on contact.</div>
+      <div class="det-signals">
+        <span class="det-signal">honeypot_hit</span>
+        <span class="det-signal">canary_triggered</span>
+        <span class="det-signal">css_trap</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ML SECTION -->
+<section id="ml">
+  <div class="section-label">Machine Learning</div>
+  <h2 class="section-title">FIVE MODELS.<br>ONE VERDICT.</h2>
+  <p class="section-body">All models run in parallel per request. Results fuse into a single ML score contribution. All retrain nightly. No labeled data required to start.</p>
+
+  <div class="ml-grid reveal">
+    <div class="ml-card">
+      <div class="ml-model">Isolation Forest</div>
+      <div class="ml-type">Unsupervised Anomaly</div>
+      <div class="ml-desc">35-feature vector. Isolates outliers in high-dimensional space. No labels needed. Detects novel attacks before signatures exist.</div>
+    </div>
+    <div class="ml-card">
+      <div class="ml-model">LSTM + Attention</div>
+      <div class="ml-type">Sequence Classifier</div>
+      <div class="ml-desc">Session endpoint sequences. Humans navigate logically. Bots jump to /api/data directly. Bidirectional LSTM with multi-head attention.</div>
+    </div>
+    <div class="ml-card">
+      <div class="ml-model">Transformer Encoder</div>
+      <div class="ml-type">Coordination Detector</div>
+      <div class="ml-desc">Cross-session window analysis. Finds distributed attacks where per-IP rate is clean but global coordination is unmistakable.</div>
+    </div>
+    <div class="ml-card">
+      <div class="ml-model">DBSCAN</div>
+      <div class="ml-type">Fingerprint Clustering</div>
+      <div class="ml-desc">Density clustering on fingerprint vectors (canvas, WebGL, fonts). Finds bot farms using identical browser configs across thousands of IPs.</div>
+    </div>
+    <div class="ml-card">
+      <div class="ml-model">Graph + Louvain</div>
+      <div class="ml-type">Botnet Detection</div>
+      <div class="ml-desc">Traffic as a multigraph. IP→Fingerprint→Session→Endpoint edges. Community detection finds coordinated clusters invisible to per-request analysis.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- WINDOWS -->
+<section id="windows">
+  <div class="section-label">Platform Support</div>
+  <h2 class="section-title">RUNS ON<br>WINDOWS TOO.</h2>
+  <p class="section-body">
+    eBPF is Linux-only. On Windows, Vo!d's kernel layer is replaced by a
+    software-mode WFP (Windows Filtering Platform) shim. All detection layers
+    above L1 are 100% identical on both platforms.
+  </p>
+
+  <table class="compat-table reveal">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>Linux</th>
+        <th>Windows</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>TLS fingerprinting (JA3 / JA4)</td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td><td>Pure Rust, fully cross-platform</td></tr>
+      <tr><td>HTTP/2 SETTINGS fingerprinting</td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td><td>Pure Rust, fully cross-platform</td></tr>
+      <tr><td>Request normalization (all bypass variants)</td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td><td>Pure Rust, fully cross-platform</td></tr>
+      <tr><td>All rate limiting scopes (4 dimensions)</td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td><td>Redis-backed, platform-agnostic</td></tr>
+      <tr><td>Session &amp; browser fingerprinting</td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td><td>Redis-backed, platform-agnostic</td></tr>
+      <tr><td>IP intelligence (GeoIP / ASN / TOR)</td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td><td>MaxMind, platform-agnostic</td></tr>
+      <tr><td>All 5 ML models</td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td><td>Python, runs in Docker</td></tr>
+      <tr><td>Full challenge system (PoW / WASM / CAPTCHA)</td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td><td>Browser-side, platform-agnostic</td></tr>
+      <tr><td>Honeypots &amp; canaries</td><td><span class="check-yes">✓</span></td><td><span class="check-yes">✓</span></td><td>Application-layer, platform-agnostic</td></tr>
+      <tr><td>eBPF XDP (NIC-level, pre-kernel)</td><td><span class="check-yes">✓</span></td><td><span class="check-no">✗</span></td><td>Software WFP shim on Windows (~5% overhead)</td></tr>
+      <tr><td>eBPF TC hook (kernel TCP inspection)</td><td><span class="check-yes">✓</span></td><td><span class="check-no">✗</span></td><td>In-process SYN tracker on Windows</td></tr>
+      <tr><td>TCP option fingerprint (SYN packet)</td><td><span class="check-yes">✓</span></td><td><span class="check-partial">~</span></td><td>Available on Windows with elevated privileges</td></tr>
+    </tbody>
+  </table>
+
+  <div class="code-snip reveal" style="margin-top:40px">
+<span class="c"># Windows — PowerShell (run as Administrator)</span>
+.\scripts\deploy-windows.ps1 -Upstream http://your-backend:3000
+
+<span class="c"># Linux — bash</span>
+./scripts/deploy.sh --upstream http://your-backend:3000
+
+<span class="c"># Both output:</span>
+<span class="s">Vo!d is running!</span>
+  Edge Proxy:   http://localhost:<span class="n">8080</span>
+  Dashboard:    http://localhost:<span class="n">3001</span>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- DEPLOY -->
+<section id="deploy">
+  <div class="section-label">Get Started</div>
+  <h2 class="section-title">ONE COMMAND.<br>FULL PROTECTION.</h2>
+  <p class="section-body">Docker-based deploy. Bring your own backend. Vo!d sits in front.</p>
+
+  <div class="code-snip reveal">
+<span class="c"># 1. Clone</span>
+git clone https://github.com/yourorg/void && cd void
+
+<span class="c"># 2. Linux</span>
+./scripts/deploy.sh --upstream http://your-app:3000
+
+<span class="c"># 2. Windows (PowerShell, run as Admin)</span>
+.\scripts\deploy-windows.ps1 -Upstream http://your-app:3000
+
+<span class="c"># 3. Point your load balancer / DNS at port 8080.</span>
+<span class="c"># That's it. Vo!d handles everything else.</span>
+  </div>
+
+  <div class="stats-grid reveal" style="margin-top:40px; grid-template-columns: repeat(3,1fr)">
+    <div class="stat-cell">
+      <div class="stat-n" style="font-size:40px">60<span class="unit">s</span></div>
+      <div class="stat-desc">Time to deploy</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-n" style="font-size:40px">0</div>
+      <div class="stat-desc">Config required to start</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-n" style="font-size:40px">100%</div>
+      <div class="stat-desc">Open source, no vendor</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="section-label" style="justify-content:center">Open Source Protection</div>
+  <h2 class="section-title" style="text-align:center">THE<br><span style="color:var(--acid)">VO!D</span><br>AWAITS.</h2>
+  <p class="section-body" style="text-align:center;margin:24px auto">
+    Every bot blocked. Every DDoS devoured. Every fingerprint remembered.
+    Open, modular, self-optimizing. Yours.
+  </p>
+  <div class="hero-actions" style="justify-content:center">
+    <a href="#deploy" class="btn-primary">Deploy Now</a>
+    <a href="https://github.com/yourorg/void" class="btn-secondary">GitHub →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Vo<span>!</span>d</div>
+  <ul class="footer-links">
+    <li><a href="#how">Architecture</a></li>
+    <li><a href="#detection">Detection</a></li>
+    <li><a href="#ml">ML Engine</a></li>
+    <li><a href="#windows">Windows</a></li>
+    <li><a href="https://github.com/yourorg/void">GitHub</a></li>
+  </ul>
+  <div class="footer-copy">Open Source · MIT License · Linux &amp; Windows</div>
+</footer>
+
+<script>
+// ── Live stats from Vo!d behavior engine ──────────────────────
+// Fetches /__void/stats which reads directly from Redis counters
+// incremented by the edge proxy on every block/challenge event.
+// If the engine is unreachable, counters show "—" — no fake numbers.
+
+const STATS_API = '/__void/stats';
+let apiOnline = false;
+let prevBots = null;
+let botsTickInterval = null;
+
+// ── Set a counter element to a real value ──────────────────────
+function setCounter(id, value, animate = true) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (value == null) return;
+  if (!animate) { el.textContent = Number(value).toLocaleString(); el.dataset.v = value; return; }
+  const from = parseInt(el.dataset.v || '0') || 0;
+  const to   = parseInt(value) || 0;
+  if (from === to) return;
+  const dur = 900;
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    const v = Math.floor(from + (to - from) * ease);
+    el.textContent = v.toLocaleString();
+    if (t < 1) requestAnimationFrame(step);
+    else { el.textContent = to.toLocaleString(); el.dataset.v = to; }
+  }
+  requestAnimationFrame(step);
+}
+
+// ── Show dashes when API is offline ───────────────────────────
+function showOffline() {
+  ['cnt-bots','cnt-req','cnt-ddos','cnt-fp'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.v) el.textContent = '—';
+  });
+  // Show offline banner inside counter bar
+  if (!document.getElementById('void-offline-note')) {
+    const bar = document.querySelector('.counter-bar');
+    if (bar) {
+      const note = document.createElement('span');
+      note.id = 'void-offline-note';
+      note.style.cssText = 'font-size:10px;color:rgba(0,0,0,0.45);letter-spacing:0.12em;text-transform:uppercase;font-family:"IBM Plex Mono",monospace;margin-left:auto;white-space:nowrap';
+      note.textContent = '● ENGINE OFFLINE';
+      bar.appendChild(note);
+    }
+  }
+}
+
+function clearOfflineBanner() {
+  const note = document.getElementById('void-offline-note');
+  if (note) note.remove();
+}
+
+// ── Fetch real stats ───────────────────────────────────────────
+async function fetchStats() {
+  try {
+    const res = await fetch(STATS_API, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!res.ok) throw new Error(res.status);
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+// ── Smooth bot-tick between API polls ─────────────────────────
+// Only runs when we have a real previous value AND a new value.
+// Distributes the real delta evenly across the 5s poll interval.
+function startBotTick(fromValue, toValue, intervalMs) {
+  if (botsTickInterval) clearInterval(botsTickInterval);
+  const delta = Math.max(0, toValue - fromValue);
+  if (delta === 0) return;
+  const ticksTotal = Math.floor(intervalMs / 80);
+  const perTick    = delta / ticksTotal;
+  let accumulated  = 0;
+  let ticks        = 0;
+  botsTickInterval = setInterval(() => {
+    if (ticks >= ticksTotal) { clearInterval(botsTickInterval); return; }
+    accumulated += perTick;
+    if (accumulated >= 1) {
+      const add = Math.floor(accumulated);
+      accumulated -= add;
+      const el = document.getElementById('cnt-bots');
+      if (el && el.dataset.v) {
+        const v = parseInt(el.dataset.v) + add;
+        el.textContent = v.toLocaleString();
+        el.dataset.v   = v;
+      }
+    }
+    ticks++;
+  }, 80);
+}
+
+// ── Main poll loop ─────────────────────────────────────────────
+async function poll() {
+  const data = await fetchStats();
+
+  if (!data) {
+    if (apiOnline) { apiOnline = false; showOffline(); }
+    return;
+  }
+
+  // API came back online
+  if (!apiOnline) { apiOnline = true; clearOfflineBanner(); }
+
+  const newBots = parseInt(data.bots_blocked_total) || 0;
+
+  // Animate bot counter smoothly between real values
+  if (prevBots !== null && newBots > prevBots) {
+    startBotTick(prevBots, newBots, 5000);
+  } else {
+    setCounter('cnt-bots', newBots);
+  }
+  prevBots = newBots;
+
+  setCounter('cnt-req',  data.requests_per_sec);
+  setCounter('cnt-ddos', data.ddos_attacks_total);
+  setCounter('cnt-fp',   data.fingerprints_tracked);
+
+  const latEl = document.getElementById('cnt-lat');
+  if (latEl) latEl.innerHTML = (data.edge_latency_ms || '&lt;1') + '<span style="font-size:18px">ms</span>';
+}
+
+// ── Boot ───────────────────────────────────────────────────────
+(async () => {
+  // First fetch immediately on load
+  await poll();
+  // Then every 5 seconds
+  setInterval(poll, 5000);
+})();
+
+// ── Scroll reveal ──────────────────────────────────────────────
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── Cursor trail ───────────────────────────────────────────────
+document.addEventListener('mousemove', (e) => {
+  const dot = document.createElement('div');
+  dot.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:4px;height:4px;background:rgba(200,255,0,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:opacity 0.5s;`;
+  document.body.appendChild(dot);
+  setTimeout(() => { dot.style.opacity = '0'; }, 50);
+  setTimeout(() => dot.remove(), 560);
+});
+</script>
+</body>
+</html>

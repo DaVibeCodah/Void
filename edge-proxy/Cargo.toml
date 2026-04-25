@@ -1,0 +1,67 @@
+[package]
+name = "void-edge"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "void-edge"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+hyper = { version = "1", features = ["full"] }
+hyper-rustls = { version = "0.27", features = ["http2"] }
+h2 = "0.4"
+rustls = "0.23"
+rustls-pemfile = "2"
+
+# Async / networking
+reqwest = { version = "0.12", features = ["json", "gzip"] }
+tokio-rustls = "0.26"
+
+# Redis
+redis = { version = "0.25", features = ["aio", "tokio-comp", "script"] }
+
+# Fingerprinting
+md5 = "0.7"
+sha2 = "1"
+hmac = { version = "0.12", features = ["std"] }
+base64 = "0.22"
+
+# GeoIP
+maxminddb = "0.23"
+
+# Data / Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Encoding
+percent-encoding = "2"
+unicode-normalization = "0.1"
+
+# Error handling
+anyhow = "1"
+thiserror = "1"
+
+# Utilities
+rand = "0.8"
+fastrand = "2"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["winsock2", "ws2tcpip", "iphlpapi"] }
+
+[target.'cfg(unix)'.dependencies]
+aya = { version = "0.12", optional = true }
+aya-log = { version = "0.2", optional = true }
+
+[features]
+default = []
+ebpf = ["aya", "aya-log"]

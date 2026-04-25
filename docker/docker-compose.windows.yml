@@ -1,0 +1,93 @@
+version: "3.9"
+# Vo!d — Windows / Docker Desktop deployment
+# eBPF is Linux-only. This compose file omits the ebpf-loader
+# and uses the WFP (Windows Filtering Platform) shim instead.
+
+services:
+
+  void-edge:
+    build:
+      context: ../edge-proxy
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "443:443"
+    environment:
+      LISTEN_ADDR: "0.0.0.0:8080"
+      UPSTREAM: "${UPSTREAM:-http://origin:3000}"
+      REDIS_URL: "redis://redis:6379"
+      BEHAVIOR_ENGINE_URL: "http://behavior-engine:8000"
+      GEOIP_DB: "/data/GeoLite2-City.mmdb"
+      ASN_DB: "/data/GeoLite2-ASN.mmdb"
+      VOID_EBPF_ENABLED: "false"
+      VOID_MODE: "windows"
+      RUST_LOG: "info"
+    volumes:
+      - ../config/geoip:/data:ro
+      - ../config/edge-config.yml:/config.yml:ro
+    depends_on:
+      - redis
+      - behavior-engine
+    restart: unless-stopped
+
+  # NOTE: ebpf-loader is omitted on Windows.
+  # SYN flood protection is handled by the Windows Filtering Platform (WFP)
+  # shim built into void-edge when VOID_EBPF_ENABLED=false.
+
+  behavior-engine:
+    build:
+      context: ../behavior-engine
+      dockerfile: Dockerfile
+    volumes:
+      - ../models:/models
+    environment:
+      REDIS_URL: "redis://redis:6379"
+      CHALLENGE_SECRET: "${CHALLENGE_SECRET}"
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: >
+      redis-server
+      --maxmemory 4gb
+      --maxmemory-policy allkeys-lru
+      --save ""
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  origin:
+    image: nginx:alpine
+    ports:
+      - "127.0.0.1:3000:80"
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ../config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_PASSWORD:-admin}"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+  prometheus-data:
+  grafana-data:

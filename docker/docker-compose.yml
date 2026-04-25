@@ -1,0 +1,141 @@
+version: "3.9"
+
+services:
+
+  # ── Edge Proxy (Rust) ─────────────────────────────────────────────
+  edge-proxy:
+    build:
+      context: ./edge-proxy
+      dockerfile: Dockerfile
+    network_mode: host          # Required for XDP/eBPF access
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_RESOURCE
+    privileged: true            # Required for XDP
+    volumes:
+      - /sys/fs/bpf:/sys/fs/bpf
+      - ./config/geoip:/data:ro
+      - ./config/edge-config.yml:/config.yml:ro
+    environment:
+      LISTEN_ADDR: "0.0.0.0:8080"
+      UPSTREAM: "http://origin:3000"
+      REDIS_URL: "redis://redis:6379"
+      BEHAVIOR_ENGINE_URL: "http://behavior-engine:8000"
+      GEOIP_DB: "/data/GeoLite2-City.mmdb"
+      ASN_DB: "/data/GeoLite2-ASN.mmdb"
+      TLS_CERT: "/config/tls/cert.pem"
+      TLS_KEY: "/config/tls/key.pem"
+      RUST_LOG: "info"
+    depends_on:
+      - redis
+      - behavior-engine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/__void/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ── eBPF Loader ────────────────────────────────────────────────────
+  ebpf-loader:
+    build:
+      context: ./ebpf
+      dockerfile: Dockerfile
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    privileged: true
+    volumes:
+      - /sys/fs/bpf:/sys/fs/bpf
+    environment:
+      INTERFACE: "eth0"
+      RUST_LOG: "info"
+    restart: unless-stopped
+
+  # ── Behavior Engine (Python/ML) ───────────────────────────────────
+  behavior-engine:
+    build:
+      context: ./behavior-engine
+      dockerfile: Dockerfile
+    volumes:
+      - ./models:/models
+    environment:
+      REDIS_URL: "redis://redis:6379"
+      MODEL_PATH: "/models/isolation_forest.pkl"
+      LSTM_MODEL_PATH: "/models/sequence_lstm.pt"
+      TRANSFORMER_MODEL_PATH: "/models/coordination_transformer.pt"
+      CHALLENGE_SECRET: "${CHALLENGE_SECRET}"
+      WORKERS: "4"
+    depends_on:
+      - redis
+    ports:
+      - "127.0.0.1:8000:8000"  # Internal only
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Redis (Rate limits, session store, feature store) ─────────────
+  redis:
+    image: redis:7-alpine
+    command: >
+      redis-server
+      --maxmemory 4gb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+      --tcp-backlog 65535
+      --hz 100
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    sysctls:
+      net.core.somaxconn: 65535
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+
+  # ── Origin (protected backend — example) ─────────────────────────
+  origin:
+    image: nginx:alpine
+    volumes:
+      - ./config/nginx-origin.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "127.0.0.1:3000:80"
+    restart: unless-stopped
+
+  # ── Prometheus (metrics) ──────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    restart: unless-stopped
+
+  # ── Grafana (dashboard) ───────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_PASSWORD:-admin}"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+  prometheus-data:
+  grafana-data:
